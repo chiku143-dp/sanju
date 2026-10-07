@@ -1,4 +1,4 @@
-name: Build SANJU APk
+name: Build SANJU APK
 
 on:
   workflow_dispatch:
@@ -32,11 +32,16 @@ jobs:
         with:
           gradle-version: "8.9"
 
+      - name: Find Android project
+        run: |
+          PROJECT_DIR=$(find sanju_project -name settings.gradle -o -name settings.gradle.kts | head -n 1 | xargs dirname)
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          echo "Android project found at: $PROJECT_DIR"
+
       - name: Build SANJU APK
         run: |
-          cd sanju_project
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          cd "$PROJECT_DIR"
+          gradle assembleDebug --stacktrace
 
       - name: Upload SANJU APK
         uses: actions/upload-artifact@v4
