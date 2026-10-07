@@ -32,38 +32,33 @@ jobs:
         with:
           gradle-version: "8.9"
 
-      - name: Find Android project
+      - name: Configure JVM 17
         run: |
-          PROJECT_DIR=$(find sanju_project -name "settings.gradle" -o -name "settings.gradle.kts" | head -n 1 | xargs dirname)
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          cd sanju_project
 
-      - name: Fix JVM target
-        run: |
-          cd "$PROJECT_DIR"
-          cat >> app/build.gradle <<'EOF'
+          cat >> app/build.gradle.kts <<'EOF'
 
           android {
               compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
               }
           }
 
-          tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-              kotlinOptions {
-                  jvmTarget = "17"
+          kotlin {
+              compilerOptions {
+                  jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
               }
           }
           EOF
 
       - name: Build SANJU APK
         run: |
-          cd "$PROJECT_DIR"
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          cd sanju_project
+          gradle assembleDebug --stacktrace
 
       - name: Upload SANJU APK
         uses: actions/upload-artifact@v4
         with:
           name: SANJU-APK
-          path: "$PROJECT_DIR/**/build/outputs/apk/debug/*.apk"
+          path: sanju_project/app/build/outputs/apk/debug/*.apk
