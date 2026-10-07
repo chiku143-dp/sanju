@@ -41,8 +41,8 @@ jobs:
       - name: Build SANJU APK
         run: |
           cd sanju_project
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          
+        gradle assembleDebug --stacktrace
 
       - name: Upload SANJU APK
         uses: actions/upload-artifact@v4
