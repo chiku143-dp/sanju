@@ -32,13 +32,20 @@ jobs:
         with:
           gradle-version: "8.9"
 
-      - name: Build SANJU APK
-        working-directory: sanju_project
+      - name: Fix JVM target
         run: |
-          gradle assembleDebug --stacktrace
+          cd sanju_project
+          find . -name "*.gradle.kts" -type f -exec sed -i \
+            's/jvmTarget *= *"1.8"/jvmTarget = "17"/g' {} \;
+
+      - name: Build SANJU APK
+        run: |
+          cd sanju_project
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload SANJU APK
         uses: actions/upload-artifact@v4
         with:
-          name: SANJU-debug-APK
+          name: SANJU-APK
           path: sanju_project/app/build/outputs/apk/debug/*.apk
